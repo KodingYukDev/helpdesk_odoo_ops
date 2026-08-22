@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import hmac
 import json
 import logging
 from odoo import http, fields
@@ -16,6 +17,24 @@ def _json_response(data, status=200):
     )
 
 
+def _has_valid_api_key():
+    expected = request.env['ir.config_parameter'].sudo().get_param(
+        'helpdesk.api.key',
+        '',
+    )
+    provided = request.httprequest.headers.get('X-API-Key', '')
+    if not expected or not provided:
+        return False
+    try:
+        return hmac.compare_digest(str(expected), str(provided))
+    except TypeError:
+        return False
+
+
+def _unauthorized():
+    return {'success': False, 'error': 'Unauthorized'}
+
+
 class HelpdeskAPI(http.Controller):
     """REST API controller for Helpdesk Web Dashboard.
     
@@ -30,6 +49,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/auth/login', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_login(self, email='', name='', **kwargs):
         """Authenticate user by email (from Google SSO). Returns user info and role."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         email = email.strip().lower()
         
         if not email:
@@ -77,6 +98,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/master/systems', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_get_systems(self, **kwargs):
         """Get list of active system types."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         systems = request.env['helpdesk.system.type'].sudo().search_read(
             [('active', '=', True)],
             ['id', 'name'],
@@ -87,6 +110,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/master/issue-types', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_get_issue_types(self, **kwargs):
         """Get list of active issue types."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         issue_types = request.env['helpdesk.issue.type'].sudo().search_read(
             [('active', '=', True)],
             ['id', 'name'],
@@ -101,6 +126,8 @@ class HelpdeskAPI(http.Controller):
                         issue_type_id=None, search='', offset=0, limit=20,
                         order='date desc, id desc', **kwargs):
         """Get tickets with optional filters."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         domain = []
         
         if partner_id:
@@ -155,6 +182,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/tickets/detail', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_get_ticket_detail(self, ticket_id=None, **kwargs):
         """Get single ticket detail with attachments and messages."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         if not ticket_id:
             return {'success': False, 'error': 'ticket_id is required'}
         
@@ -208,6 +237,8 @@ class HelpdeskAPI(http.Controller):
     def api_create_ticket(self, staff_id=None, system_id=None, issue_type_id=None,
                           chronology='', data_to_fix='', attachments=None, **kwargs):
         """Create a new ticket."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         if not staff_id or not system_id or not issue_type_id or not chronology or not data_to_fix:
             return {'success': False, 'error': 'staff_id, system_id, issue_type_id, chronology, and data_to_fix are required'}
         
@@ -244,6 +275,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/tickets/update-state', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_update_ticket_state(self, ticket_id=None, state=None, **kwargs):
         """Update ticket state (admin action)."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         if not ticket_id or not state:
             return {'success': False, 'error': 'ticket_id and state are required'}
         
@@ -264,6 +297,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/tickets/add-note', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_add_note(self, ticket_id=None, body='', message_type='comment', **kwargs):
         """Add internal note or message to ticket."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         if not ticket_id or not body:
             return {'success': False, 'error': 'ticket_id and body are required'}
         
@@ -285,6 +320,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/tickets/add-attachment', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_add_attachment(self, ticket_id=None, attachments=None, **kwargs):
         """Add Firebase attachment to existing ticket."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         if not ticket_id or not attachments:
             return {'success': False, 'error': 'ticket_id and attachments are required'}
         
@@ -317,6 +354,8 @@ class HelpdeskAPI(http.Controller):
     @http.route('/api/helpdesk/stats', type='json', auth='none', methods=['POST'], csrf=False, cors='*')
     def api_get_stats(self, **kwargs):
         """Get ticket statistics for admin dashboard."""
+        if not _has_valid_api_key():
+            return _unauthorized()
         import datetime
         
         Ticket = request.env['kodingyuk.helpdesk.ticket'].sudo()
