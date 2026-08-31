@@ -23,9 +23,9 @@
             <form string="Joiner Request Form">
                 <header>
                     <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_start" string="Start Preparation" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'submitted'"/>
-                    <button name="action_ready" string="Mark Ready" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'in_progress'"/>
-                    <button name="action_complete" string="Complete" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'ready'"/>
+                    <button name="action_start" string="Start Preparation" type="object" class="oe_highlight" groups="kodingyuk_helpdesk.group_helpdesk_staff" invisible="state != 'submitted'"/>
+                    <button name="action_ready" string="Mark Ready" type="object" class="oe_highlight" groups="kodingyuk_helpdesk.group_helpdesk_staff" invisible="state != 'in_progress'"/>
+                    <button name="action_complete" string="Complete" type="object" class="oe_highlight" groups="kodingyuk_helpdesk.group_helpdesk_staff" invisible="state != 'ready'"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state in ('completed', 'cancelled')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,submitted,in_progress,ready,completed"/>
                 </header>
@@ -43,7 +43,7 @@
                             <field name="job_title" readonly="state != 'draft'"/>
                             <field name="employment_type" readonly="state != 'draft'"/>
                             <field name="start_date" readonly="state != 'draft'"/>
-                            <field name="assigned_to" groups="group_helpdesk_staff" options="{'no_create': True}"/>
+                            <field name="assigned_to" groups="kodingyuk_helpdesk.group_helpdesk_staff" options="{'no_create': True}"/>
                             <field name="completed_date"/>
                         </group>
                     </group>
@@ -62,7 +62,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Completion" groups="group_helpdesk_staff">
+                        <page string="Completion" groups="kodingyuk_helpdesk.group_helpdesk_staff">
                             <field name="completion_notes"/>
                         </page>
                     </notebook>

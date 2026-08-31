@@ -24,9 +24,9 @@
                 <header>
                     <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_dept_approve" string="Approve Department" type="object" class="oe_highlight" invisible="state != 'dept_review'"/>
-                    <button name="action_it_approve" string="Approve IT" type="object" class="oe_highlight" groups="group_helpdesk_manager" invisible="state != 'it_review'"/>
+                    <button name="action_it_approve" string="Approve IT" type="object" class="oe_highlight" groups="kodingyuk_helpdesk.group_helpdesk_manager" invisible="state != 'it_review'"/>
                     <button name="action_reject" string="Reject" type="object" invisible="state not in ('dept_review', 'it_review')" confirm="Pastikan alasan penolakan sudah diisi."/>
-                    <button name="action_implement" string="Mark Implemented" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'approved'"/>
+                    <button name="action_implement" string="Mark Implemented" type="object" class="oe_highlight" groups="kodingyuk_helpdesk.group_helpdesk_staff" invisible="state != 'approved'"/>
                     <button name="action_withdraw" string="Withdraw" type="object" invisible="state not in ('draft', 'dept_review')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,dept_review,it_review,approved,implemented"/>
                 </header>
@@ -60,9 +60,9 @@
                                     <field name="rejection_reason" readonly="state not in ('dept_review', 'it_review')"/>
                                 </group>
                                 <group>
-                                    <field name="implemented_by" groups="group_helpdesk_staff" options="{'no_create': True}"/>
+                                    <field name="implemented_by" groups="kodingyuk_helpdesk.group_helpdesk_staff" options="{'no_create': True}"/>
                                     <field name="implemented_date"/>
-                                    <field name="implementation_notes" groups="group_helpdesk_staff"/>
+                                    <field name="implementation_notes" groups="kodingyuk_helpdesk.group_helpdesk_staff"/>
                                 </group>
                             </group>
                         </page>

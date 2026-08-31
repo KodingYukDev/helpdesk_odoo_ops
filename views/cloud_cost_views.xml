@@ -11,7 +11,7 @@
                 <field name="cost_line_count"/>
                 <field name="last_sync_at"/>
                 <field name="last_sync_status" widget="badge"/>
-                <button name="action_sync_costs" string="Sync" type="object" icon="fa-refresh" groups="group_helpdesk_manager"/>
+                <button name="action_sync_costs" string="Sync" type="object" icon="fa-refresh" groups="kodingyuk_helpdesk.group_helpdesk_manager"/>
             </tree>
         </field>
     </record>
@@ -22,7 +22,7 @@
         <field name="arch" type="xml">
             <form string="Cloud Billing Account">
                 <header>
-                    <button name="action_sync_costs" string="Sync Costs Now" type="object" class="oe_highlight" groups="group_helpdesk_manager"/>
+                    <button name="action_sync_costs" string="Sync Costs Now" type="object" class="oe_highlight" groups="kodingyuk_helpdesk.group_helpdesk_manager"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
