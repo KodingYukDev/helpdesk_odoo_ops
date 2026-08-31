@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_it_cloud_account_tree" model="ir.ui.view">
+        <field name="name">it.cloud.account.tree</field>
+        <field name="model">it.cloud.account</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="last_sync_status == 'success'" decoration-danger="last_sync_status == 'error'">
+                <field name="name"/>
+                <field name="provider" widget="badge"/>
+                <field name="active" widget="boolean_toggle"/>
+                <field name="cost_line_count"/>
+                <field name="last_sync_at"/>
+                <field name="last_sync_status" widget="badge"/>
+                <button name="action_sync_costs" string="Sync" type="object" icon="fa-refresh" groups="group_helpdesk_manager"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_it_cloud_account_form" model="ir.ui.view">
+        <field name="name">it.cloud.account.form</field>
+        <field name="model">it.cloud.account</field>
+        <field name="arch" type="xml">
+            <form string="Cloud Billing Account">
+                <header>
+                    <button name="action_sync_costs" string="Sync Costs Now" type="object" class="oe_highlight" groups="group_helpdesk_manager"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_cost_lines" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="cost_line_count" widget="statinfo" string="Cost Lines"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="provider"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="sync_days"/>
+                            <field name="initial_sync_days"/>
+                        </group>
+                        <group string="Last Synchronization">
+                            <field name="last_sync_at"/>
+                            <field name="last_sync_status" widget="badge"/>
+                            <field name="last_sync_message" nolabel="1"/>
+                        </group>
+                    </group>
+                    <group string="AWS — default credential chain / IAM role" invisible="provider != 'aws'">
+                        <group>
+                            <field name="aws_region"/>
+                            <field name="aws_profile"/>
+                        </group>
+                        <group>
+                            <field name="aws_role_arn"/>
+                            <field name="aws_external_id" password="True"/>
+                        </group>
+                    </group>
+                    <group string="GCP — BigQuery Billing Export" invisible="provider != 'gcp'">
+                        <field name="gcp_billing_table" placeholder="project_id.dataset_id.gcp_billing_export_v1_XXXXXX"/>
+                        <field name="gcp_credentials_path" placeholder="/etc/odoo/secrets/gcp-billing-reader.json"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Secret tidak disimpan di Odoo. AWS memakai credential chain/IAM role server; GCP memakai ADC atau file service account read-only di server.
+                    </div>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_it_cloud_cost_tree" model="ir.ui.view">
+        <field name="name">it.cloud.cost.tree</field>
+        <field name="model">it.cloud.cost</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" delete="0">
+                <field name="usage_date"/>
+                <field name="provider" widget="badge"/>
+                <field name="account_id"/>
+                <field name="service"/>
+                <field name="cloud_project"/>
+                <field name="region"/>
+                <field name="cost" sum="Total"/>
+                <field name="currency"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_it_cloud_cost_pivot" model="ir.ui.view">
+        <field name="name">it.cloud.cost.pivot</field>
+        <field name="model">it.cloud.cost</field>
+        <field name="arch" type="xml">
+            <pivot string="Cloud Cost">
+                <field name="provider" type="row"/>
+                <field name="service" type="row"/>
+                <field name="usage_date" interval="month" type="col"/>
+                <field name="cost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_it_cloud_cost_graph" model="ir.ui.view">
+        <field name="name">it.cloud.cost.graph</field>
+        <field name="model">it.cloud.cost</field>
+        <field name="arch" type="xml">
+            <graph string="Cloud Cost Trend" type="line">
+                <field name="usage_date" interval="month"/>
+                <field name="cost" type="measure"/>
+                <field name="provider"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_it_cloud_cost_search" model="ir.ui.view">
+        <field name="name">it.cloud.cost.search</field>
+        <field name="model">it.cloud.cost</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="service"/>
+                <field name="cloud_project"/>
+                <field name="account_id"/>
+                <filter name="aws" string="AWS" domain="[('provider', '=', 'aws')]"/>
+                <filter name="gcp" string="GCP" domain="[('provider', '=', 'gcp')]"/>
+                <separator/>
+                <filter name="usage_date" string="Usage Date" date="usage_date"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_provider" string="Provider" context="{'group_by': 'provider'}"/>
+                    <filter name="group_service" string="Service" context="{'group_by': 'service'}"/>
+                    <filter name="group_project" string="Account / Project" context="{'group_by': 'cloud_project'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'usage_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_it_cloud_account" model="ir.actions.act_window">
+        <field name="name">Cloud Accounts</field>
+        <field name="res_model">it.cloud.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_it_cloud_cost" model="ir.actions.act_window">
+        <field name="name">Cloud Costs</field>
+        <field name="res_model">it.cloud.cost</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="search_view_id" ref="view_it_cloud_cost_search"/>
+    </record>
+
+    <menuitem id="menu_it_cloud_cost" name="Cost Analysis" parent="menu_it_cloud_cost_root"
+              action="action_it_cloud_cost" sequence="10" groups="group_helpdesk_staff"/>
+    <menuitem id="menu_it_cloud_account" name="Cloud Accounts" parent="menu_helpdesk_config"
+              action="action_it_cloud_account" sequence="10" groups="group_helpdesk_manager"/>
+</odoo>

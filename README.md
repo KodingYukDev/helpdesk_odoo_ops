@@ -1,4 +1,48 @@
-# Helpdesk System — Odoo Module
+# KodingYuk IT — Odoo Module
+
+Satu aplikasi Odoo 17 untuk operasional IT KodingYuk. Modul ini mempertahankan
+Helpdesk dan Firebase attachment yang sudah ada, lalu menambahkan:
+
+- dashboard statistik Helpdesk, ARF, JRF, serta cloud cost MTD/YTD;
+- ARF (Access Request Form) dengan approval Department Manager dan IT Manager;
+- JRF (Joiner Request Form) untuk persiapan akun, akses, VPN, dan perangkat;
+- generator sekaligus setter password user Odoo;
+- sinkronisasi AWS Cost Explorer dan GCP Billing Export di BigQuery;
+- pivot, graph, dan breakdown biaya per provider, service, project/account, dan bulan.
+
+## Cloud billing setup
+
+Install package Python opsional di environment Odoo:
+
+```bash
+pip install -r requirements.txt
+```
+
+AWS menggunakan default credential chain dari `boto3` (disarankan IAM role
+read-only) atau profile server. Odoo tidak menyimpan access key/secret key.
+Role minimal perlu izin `ce:GetCostAndUsage`; jika memakai AssumeRole, tambahkan
+izin STS yang sesuai.
+
+GCP menggunakan Application Default Credentials atau path service-account JSON
+read-only di server. Aktifkan Cloud Billing Export ke BigQuery, lalu isi nama
+tabel lengkap dalam format `project.dataset.table`. Service account memerlukan
+izin membaca dataset dan menjalankan BigQuery query.
+
+Scheduled action menyinkronkan semua cloud account aktif setiap hari. Initial
+sync mengambil 366 hari untuk membentuk angka YTD; sinkronisasi berikutnya
+mengambil ulang 14 hari terakhir agar credit dan adjustment ikut diperbarui.
+
+## Access groups
+
+- **IT Request User**: membuat dan melihat ARF/JRF sendiri; Department Manager
+  juga dapat melihat ARF bawahannya.
+- **IT Staff**: dashboard, Helpdesk, seluruh ARF/JRF, serta laporan cloud cost.
+- **IT Manager**: seluruh akses IT Staff ditambah konfigurasi cloud account dan
+  approval IT.
+
+---
+
+# Helpdesk System — legacy documentation
 
 > Sistem ticketing internal KodingYuk dengan dukungan lampiran Firebase Storage dan REST API.
 

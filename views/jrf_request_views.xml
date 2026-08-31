@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_it_jrf_request_tree" model="ir.ui.view">
+        <field name="name">it.jrf.request.tree</field>
+        <field name="model">it.jrf.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state in ('submitted', 'in_progress')" decoration-success="state == 'completed'" decoration-warning="state == 'ready'">
+                <field name="name"/>
+                <field name="employee_name"/>
+                <field name="department_id"/>
+                <field name="job_title"/>
+                <field name="start_date"/>
+                <field name="assigned_to"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_it_jrf_request_form" model="ir.ui.view">
+        <field name="name">it.jrf.request.form</field>
+        <field name="model">it.jrf.request</field>
+        <field name="arch" type="xml">
+            <form string="Joiner Request Form">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_start" string="Start Preparation" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'submitted'"/>
+                    <button name="action_ready" string="Mark Ready" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'in_progress'"/>
+                    <button name="action_complete" string="Complete" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'ready'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('completed', 'cancelled')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,in_progress,ready,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="requester_id" readonly="1"/>
+                            <field name="employee_name" readonly="state != 'draft'"/>
+                            <field name="personal_email" readonly="state != 'draft'"/>
+                            <field name="department_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="manager_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="job_title" readonly="state != 'draft'"/>
+                            <field name="employment_type" readonly="state != 'draft'"/>
+                            <field name="start_date" readonly="state != 'draft'"/>
+                            <field name="assigned_to" groups="group_helpdesk_staff" options="{'no_create': True}"/>
+                            <field name="completed_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="IT Requirements">
+                            <group>
+                                <group>
+                                    <field name="needs_odoo" readonly="state != 'draft'"/>
+                                    <field name="needs_google" readonly="state != 'draft'"/>
+                                    <field name="needs_vpn" readonly="state != 'draft'"/>
+                                    <field name="needs_laptop" readonly="state != 'draft'"/>
+                                </group>
+                                <group>
+                                    <field name="requested_systems" readonly="state != 'draft'"/>
+                                    <field name="notes" readonly="state != 'draft'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Completion" groups="group_helpdesk_staff">
+                            <field name="completion_notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_it_jrf_request_search" model="ir.ui.view">
+        <field name="name">it.jrf.request.search</field>
+        <field name="model">it.jrf.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="employee_name"/>
+                <filter name="active" string="Active" domain="[('state', 'in', ('submitted', 'in_progress', 'ready'))]"/>
+                <filter name="completed" string="Completed" domain="[('state', '=', 'completed')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_department" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_month" string="Start Month" context="{'group_by': 'start_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_it_jrf_request" model="ir.actions.act_window">
+        <field name="name">Joiner Request Form</field>
+        <field name="res_model">it.jrf.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_it_jrf_request_search"/>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Siapkan kebutuhan IT untuk joiner baru.</p></field>
+    </record>
+
+    <menuitem id="menu_it_jrf_request" name="JRF - Joiner Request" parent="menu_it_requests"
+              action="action_it_jrf_request" sequence="20" groups="group_it_user"/>
+</odoo>

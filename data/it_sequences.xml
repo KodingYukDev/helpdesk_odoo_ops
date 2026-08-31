@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_it_arf_request" model="ir.sequence">
+        <field name="name">IT ARF Sequence</field>
+        <field name="code">it.arf.request</field>
+        <field name="prefix">ARF/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    <record id="seq_it_jrf_request" model="ir.sequence">
+        <field name="name">IT JRF Sequence</field>
+        <field name="code">it.jrf.request</field>
+        <field name="prefix">JRF/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

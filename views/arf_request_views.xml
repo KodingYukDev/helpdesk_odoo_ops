@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_it_arf_request_tree" model="ir.ui.view">
+        <field name="name">it.arf.request.tree</field>
+        <field name="model">it.arf.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state in ('dept_review', 'it_review')" decoration-success="state == 'implemented'" decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="request_date"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="system_requested"/>
+                <field name="access_level"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_it_arf_request_form" model="ir.ui.view">
+        <field name="name">it.arf.request.form</field>
+        <field name="model">it.arf.request</field>
+        <field name="arch" type="xml">
+            <form string="Access Request Form">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_dept_approve" string="Approve Department" type="object" class="oe_highlight" invisible="state != 'dept_review'"/>
+                    <button name="action_it_approve" string="Approve IT" type="object" class="oe_highlight" groups="group_helpdesk_manager" invisible="state != 'it_review'"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="state not in ('dept_review', 'it_review')" confirm="Pastikan alasan penolakan sudah diisi."/>
+                    <button name="action_implement" string="Mark Implemented" type="object" class="oe_highlight" groups="group_helpdesk_staff" invisible="state != 'approved'"/>
+                    <button name="action_withdraw" string="Withdraw" type="object" invisible="state not in ('draft', 'dept_review')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,dept_review,it_review,approved,implemented"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="employee_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="department_id" readonly="1" options="{'no_create': True}"/>
+                            <field name="dept_manager_id" readonly="1" options="{'no_create': True}"/>
+                            <field name="it_manager_id" readonly="state not in ('draft', 'dept_review')" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="request_date" readonly="state != 'draft'"/>
+                            <field name="access_category" readonly="state != 'draft'"/>
+                            <field name="system_requested" readonly="state != 'draft'"/>
+                            <field name="access_level" readonly="state != 'draft'"/>
+                            <field name="access_duration" readonly="state != 'draft'"/>
+                            <field name="access_end_date" invisible="access_duration != 'temporary'" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Business Need">
+                            <field name="justification" readonly="state != 'draft'"/>
+                        </page>
+                        <page string="Approval &amp; Implementation">
+                            <group>
+                                <group>
+                                    <field name="dept_approval_date"/>
+                                    <field name="it_approval_date"/>
+                                    <field name="rejection_reason" readonly="state not in ('dept_review', 'it_review')"/>
+                                </group>
+                                <group>
+                                    <field name="implemented_by" groups="group_helpdesk_staff" options="{'no_create': True}"/>
+                                    <field name="implemented_date"/>
+                                    <field name="implementation_notes" groups="group_helpdesk_staff"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_it_arf_request_search" model="ir.ui.view">
+        <field name="name">it.arf.request.search</field>
+        <field name="model">it.arf.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="system_requested"/>
+                <filter name="pending" string="Pending" domain="[('state', 'in', ('dept_review', 'it_review', 'approved'))]"/>
+                <filter name="implemented" string="Implemented" domain="[('state', '=', 'implemented')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_department" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'access_category'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'request_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_it_arf_request" model="ir.actions.act_window">
+        <field name="name">Access Request Form</field>
+        <field name="res_model">it.arf.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_it_arf_request_search"/>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Buat Access Request Form baru.</p></field>
+    </record>
+
+    <menuitem id="menu_it_arf_request" name="ARF - Access Request" parent="menu_it_requests"
+              action="action_it_arf_request" sequence="10" groups="group_it_user"/>
+</odoo>

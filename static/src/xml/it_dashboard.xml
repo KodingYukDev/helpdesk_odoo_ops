@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="kodingyuk_helpdesk.ITDashboard">
+        <div class="o_kyit_dashboard">
+            <div t-if="state.loading" class="o_kyit_loading">
+                <i class="fa fa-spinner fa-spin"/> Memuat statistik IT…
+            </div>
+            <t t-elif="state.data">
+                <header class="o_kyit_header">
+                    <div>
+                        <p class="o_kyit_eyebrow">KODINGYUK IT OPERATIONS</p>
+                        <h1>IT Dashboard</h1>
+                        <p>Helpdesk, access, onboarding, dan cloud spend dalam satu pandangan.</p>
+                    </div>
+                    <button class="btn btn-light" t-on-click="load">
+                        <i class="fa fa-refresh me-1"/> Refresh
+                    </button>
+                </header>
+
+                <section class="o_kyit_stat_grid">
+                    <button class="o_kyit_stat o_kyit_stat_blue" t-on-click="openHelpdesk">
+                        <span>Open Helpdesk</span>
+                        <strong t-esc="state.data.headline.open_tickets"/>
+                        <small>New + In Progress</small>
+                    </button>
+                    <button class="o_kyit_stat o_kyit_stat_amber" t-on-click="openARF">
+                        <span>Pending ARF</span>
+                        <strong t-esc="state.data.headline.pending_arf"/>
+                        <small>Menunggu review / implementasi</small>
+                    </button>
+                    <button class="o_kyit_stat o_kyit_stat_violet" t-on-click="openJRF">
+                        <span>Active JRF</span>
+                        <strong t-esc="state.data.headline.active_jrf"/>
+                        <small>Onboarding yang sedang berjalan</small>
+                    </button>
+                    <button class="o_kyit_stat o_kyit_stat_green" t-on-click="openCosts">
+                        <span>Cloud Accounts</span>
+                        <strong t-esc="state.data.headline.cloud_accounts"/>
+                        <small>AWS + GCP aktif</small>
+                    </button>
+                </section>
+
+                <section class="o_kyit_cost_grid">
+                    <article class="o_kyit_panel o_kyit_cost_summary">
+                        <div class="o_kyit_panel_title">
+                            <div>
+                                <span class="o_kyit_icon"><i class="fa fa-cloud"/></span>
+                                <h2>Cloud Cost</h2>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" t-on-click="openCosts">Analisis</button>
+                        </div>
+                        <div class="o_kyit_cost_numbers">
+                            <div>
+                                <span>MTD</span>
+                                <strong t-esc="formatCostMap(state.data.cost.mtd)"/>
+                            </div>
+                            <div>
+                                <span>YTD</span>
+                                <strong t-esc="formatCostMap(state.data.cost.ytd)"/>
+                            </div>
+                        </div>
+                        <div class="o_kyit_provider_list">
+                            <div t-foreach="state.data.cost.provider_mtd" t-as="provider" t-key="provider.provider + provider.currency">
+                                <span class="o_kyit_provider" t-esc="provider.provider"/>
+                                <strong t-esc="formatMoney(provider.amount, provider.currency)"/>
+                            </div>
+                            <div t-if="!state.data.cost.provider_mtd.length" class="o_kyit_empty">Belum ada data cost. Tambahkan Cloud Account lalu jalankan Sync.</div>
+                        </div>
+                    </article>
+
+                    <article class="o_kyit_panel">
+                        <div class="o_kyit_panel_title">
+                            <div><span class="o_kyit_icon"><i class="fa fa-line-chart"/></span><h2>6 Month Trend</h2></div>
+                            <span class="o_kyit_currency" t-esc="state.data.cost.primary_currency"/>
+                        </div>
+                        <div class="o_kyit_trend">
+                            <div class="o_kyit_trend_item" t-foreach="state.data.cost.trend" t-as="month" t-key="month.key">
+                                <div class="o_kyit_trend_value" t-esc="formatMoney(month.amount, state.data.cost.primary_currency)"/>
+                                <div class="o_kyit_trend_track">
+                                    <span t-att-style="'height:' + month.percent + '%'"/>
+                                </div>
+                                <small t-esc="month.label"/>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="o_kyit_detail_grid">
+                    <article class="o_kyit_panel">
+                        <div class="o_kyit_panel_title"><div><span class="o_kyit_icon"><i class="fa fa-ticket"/></span><h2>Helpdesk Status</h2></div><strong t-esc="state.data.ticket_states.total"/></div>
+                        <div class="o_kyit_status_list">
+                            <div t-foreach="state.data.ticket_states.items" t-as="item" t-key="item.key">
+                                <div><span t-esc="item.label"/><strong t-esc="item.count"/></div>
+                                <div class="o_kyit_bar"><span t-att-style="'width:' + item.percent + '%'"/></div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="o_kyit_panel">
+                        <div class="o_kyit_panel_title"><div><span class="o_kyit_icon"><i class="fa fa-key"/></span><h2>ARF Status</h2></div><strong t-esc="state.data.arf_states.total"/></div>
+                        <div class="o_kyit_status_list">
+                            <div t-foreach="state.data.arf_states.items" t-as="item" t-key="item.key">
+                                <div><span t-esc="item.label"/><strong t-esc="item.count"/></div>
+                                <div class="o_kyit_bar o_kyit_bar_amber"><span t-att-style="'width:' + item.percent + '%'"/></div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="o_kyit_panel">
+                        <div class="o_kyit_panel_title"><div><span class="o_kyit_icon"><i class="fa fa-user-plus"/></span><h2>JRF Status</h2></div><strong t-esc="state.data.jrf_states.total"/></div>
+                        <div class="o_kyit_status_list">
+                            <div t-foreach="state.data.jrf_states.items" t-as="item" t-key="item.key">
+                                <div><span t-esc="item.label"/><strong t-esc="item.count"/></div>
+                                <div class="o_kyit_bar o_kyit_bar_violet"><span t-att-style="'width:' + item.percent + '%'"/></div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="o_kyit_panel o_kyit_services">
+                    <div class="o_kyit_panel_title"><div><span class="o_kyit_icon"><i class="fa fa-server"/></span><h2>Top Cloud Services — MTD</h2></div></div>
+                    <div class="o_kyit_service_row" t-foreach="state.data.cost.top_services_mtd" t-as="service" t-key="service.service">
+                        <span t-esc="service.service"/>
+                        <div class="o_kyit_bar"><span t-att-style="'width:' + service.percent + '%'"/></div>
+                        <strong t-esc="formatMoney(service.amount, service.currency)"/>
+                    </div>
+                    <div t-if="!state.data.cost.top_services_mtd.length" class="o_kyit_empty">Belum ada rincian layanan cloud untuk bulan ini.</div>
+                </section>
+            </t>
+        </div>
+    </t>
+</templates>

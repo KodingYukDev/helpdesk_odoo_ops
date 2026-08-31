@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_it_cloud_cost_sync" model="ir.cron">
+        <field name="name">IT: Sync AWS/GCP Costs</field>
+        <field name="model_id" ref="model_it_cloud_account"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_sync_cloud_costs()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="ir_cron_it_arf_reminder" model="ir.cron">
+        <field name="name">IT: Reminder Approval ARF</field>
+        <field name="model_id" ref="model_it_arf_request"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_remind_pending_approvals()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

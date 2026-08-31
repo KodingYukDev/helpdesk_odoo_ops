@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_it_dashboard" model="ir.actions.client">
+        <field name="name">IT Dashboard</field>
+        <field name="tag">kodingyuk_it.dashboard</field>
+    </record>
+
+    <menuitem id="menu_helpdesk_root" name="KodingYuk IT" sequence="10" groups="base.group_user"/>
+    <menuitem id="menu_it_dashboard" name="Dashboard" parent="menu_helpdesk_root"
+              action="action_it_dashboard" sequence="1" groups="group_helpdesk_staff"/>
+    <menuitem id="menu_it_operations" name="Operations" parent="menu_helpdesk_root"
+              sequence="10" groups="group_helpdesk_staff"/>
+    <menuitem id="menu_it_requests" name="Requests" parent="menu_helpdesk_root"
+              sequence="20" groups="group_it_user"/>
+    <menuitem id="menu_helpdesk_alat" name="Tools" parent="menu_helpdesk_root"
+              sequence="50" groups="group_helpdesk_staff"/>
+    <menuitem id="menu_it_cloud_cost_root" name="Cloud Cost" parent="menu_helpdesk_root"
+              sequence="60" groups="group_helpdesk_staff"/>
+    <menuitem id="menu_helpdesk_config" name="Configuration" parent="menu_helpdesk_root"
+              sequence="100" groups="group_helpdesk_manager"/>
+</odoo>

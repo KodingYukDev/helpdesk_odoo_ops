@@ -1,21 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="module_category_kodingyuk_helpdesk" model="ir.module.category">
-        <field name="name">KodingYuk Helpdesk</field>
-        <field name="description">Category for KodingYuk Helpdesk module</field>
+        <field name="name">KodingYuk IT</field>
+        <field name="description">Access levels for the KodingYuk IT application</field>
         <field name="sequence">10</field>
     </record>
 
-    <record id="group_helpdesk_staff" model="res.groups">
-        <field name="name">Helpdesk Staff</field>
+    <record id="group_it_user" model="res.groups">
+        <field name="name">IT Request User</field>
         <field name="category_id" ref="module_category_kodingyuk_helpdesk"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
+    <record id="group_helpdesk_staff" model="res.groups">
+        <field name="name">IT Staff</field>
+        <field name="category_id" ref="module_category_kodingyuk_helpdesk"/>
+        <field name="implied_ids" eval="[(4, ref('group_it_user'))]"/>
+    </record>
+
     <record id="group_helpdesk_manager" model="res.groups">
-        <field name="name">Helpdesk Manager</field>
+        <field name="name">IT Manager</field>
         <field name="category_id" ref="module_category_kodingyuk_helpdesk"/>
         <field name="implied_ids" eval="[(4, ref('group_helpdesk_staff'))]"/>
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="rule_it_arf_user_own" model="ir.rule">
+        <field name="name">ARF: user sees own requests</field>
+        <field name="model_id" ref="model_it_arf_request"/>
+        <field name="groups" eval="[(4, ref('group_it_user'))]"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+    </record>
+
+    <record id="rule_it_arf_staff_all" model="ir.rule">
+        <field name="name">ARF: IT staff sees all requests</field>
+        <field name="model_id" ref="model_it_arf_request"/>
+        <field name="groups" eval="[(4, ref('group_helpdesk_staff'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_it_arf_department_manager" model="ir.rule">
+        <field name="name">ARF: department manager sees department requests</field>
+        <field name="model_id" ref="model_it_arf_request"/>
+        <field name="groups" eval="[(4, ref('group_it_user'))]"/>
+        <field name="domain_force">[('dept_manager_id.user_id', '=', user.id)]</field>
+    </record>
+
+    <record id="rule_it_jrf_user_own" model="ir.rule">
+        <field name="name">JRF: user sees own requests</field>
+        <field name="model_id" ref="model_it_jrf_request"/>
+        <field name="groups" eval="[(4, ref('group_it_user'))]"/>
+        <field name="domain_force">[('requester_id', '=', user.id)]</field>
+    </record>
+
+    <record id="rule_it_jrf_staff_all" model="ir.rule">
+        <field name="name">JRF: IT staff sees all requests</field>
+        <field name="model_id" ref="model_it_jrf_request"/>
+        <field name="groups" eval="[(4, ref('group_helpdesk_staff'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 </odoo>
