@@ -56,6 +56,10 @@ class HelpdeskUploadWizard(models.TransientModel):
             )
 
         ticket = self.ticket_id
+        # Attachments are created with sudo below; employees may only
+        # upload to tickets their record rules let them read.
+        ticket.check_access_rights('read')
+        ticket.check_access_rule('read')
         folder_name = f"ticket_{ticket.id}_{ticket.name.replace('/', '_')}"
         
         uploaded_files_count = 0

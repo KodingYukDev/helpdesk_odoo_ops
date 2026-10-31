@@ -59,4 +59,39 @@
         <field name="groups" eval="[(4, ref('group_helpdesk_staff'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
     </record>
+
+    <record id="rule_helpdesk_ticket_user_own" model="ir.rule">
+        <field name="name">Helpdesk: user sees own tickets</field>
+        <field name="model_id" ref="model_kodingyuk_helpdesk_ticket"/>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="domain_force">['|', ('create_uid', '=', user.id), ('staff_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <record id="rule_helpdesk_ticket_staff_all" model="ir.rule">
+        <field name="name">Helpdesk: IT staff sees all tickets</field>
+        <field name="model_id" ref="model_kodingyuk_helpdesk_ticket"/>
+        <field name="groups" eval="[(4, ref('group_helpdesk_staff'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_helpdesk_ticket_system_all" model="ir.rule">
+        <field name="name">Helpdesk: access-rights admins see all tickets</field>
+        <field name="model_id" ref="model_kodingyuk_helpdesk_ticket"/>
+        <field name="groups" eval="[(4, ref('base.group_erp_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_helpdesk_attachment_user_own" model="ir.rule">
+        <field name="name">Helpdesk attachment: user sees own ticket attachments</field>
+        <field name="model_id" ref="model_helpdesk_firebase_attachment"/>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="domain_force">['|', ('ticket_id.create_uid', '=', user.id), ('ticket_id.staff_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <record id="rule_helpdesk_attachment_staff_all" model="ir.rule">
+        <field name="name">Helpdesk attachment: IT staff and access-rights admins see all attachments</field>
+        <field name="model_id" ref="model_helpdesk_firebase_attachment"/>
+        <field name="groups" eval="[(4, ref('group_helpdesk_staff')), (4, ref('base.group_erp_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
 </odoo>

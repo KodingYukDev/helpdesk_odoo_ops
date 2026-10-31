@@ -125,6 +125,23 @@
     <!-- Menu -->
     <menuitem id="menu_helpdesk_ticket" name="Helpdesk" parent="menu_it_operations" action="action_helpdesk_ticket" sequence="10"/>
 
+    <!-- Requester entry: record rules limit employees to their own tickets -->
+    <record id="action_helpdesk_ticket_request" model="ir.actions.act_window">
+        <field name="name">Helpdesk Ticket</field>
+        <field name="res_model">kodingyuk.helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_helpdesk_ticket_search"/>
+        <field name="context">{'default_ticket_type': 'internal'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Laporkan kendala IT dengan membuat ticket helpdesk baru.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_helpdesk_ticket_request" name="Helpdesk Ticket" parent="menu_helpdesk_root"
+              action="action_helpdesk_ticket_request" sequence="15" groups="base.group_user"/>
+
     <menuitem id="menu_helpdesk_password_generator" name="Generator Password" parent="menu_helpdesk_alat" action="action_helpdesk_password_generator_wizard" sequence="10"/>
 
     <!-- Configuration Master Menus -->

@@ -17,7 +17,10 @@ class HelpdeskTicket(models.Model):
     )
 
     # staff_id is required only for internal tickets
-    staff_id = fields.Many2one('res.partner', string='Nama Staff', tracking=True)
+    staff_id = fields.Many2one(
+        'res.partner', string='Nama Staff', tracking=True,
+        default=lambda self: self.env.user.partner_id,
+    )
 
     system_id = fields.Many2one('helpdesk.system.type', string='Sistem yang Digunakan', tracking=True)
     issue_type_id = fields.Many2one('helpdesk.issue.type', string='Jenis Masalah', tracking=True)
@@ -78,7 +81,23 @@ class HelpdeskTicket(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Employees outside IT may only file new internal tickets for themselves.
+        # Access-rights admins (incl. the Rakit service account) may file on behalf
+        # of an employee.
+        user = self.env.user
+        is_requester = not self.env.su and not (
+            user.has_group('kodingyuk_helpdesk.group_helpdesk_staff')
+            or user.has_group('base.group_erp_manager')
+        )
         for vals in vals_list:
+            if is_requester:
+                vals.update({
+                    'staff_id': self.env.user.partner_id.id,
+                    'ticket_type': 'internal',
+                    'state': 'new',
+                })
+                for field_name in ('student_id', 'course_id', 'kodyhost_service_id', 'kodyhost_client_id'):
+                    vals.pop(field_name, None)
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = (
                     self.env['ir.sequence'].next_by_code('kodingyuk.helpdesk.ticket')
@@ -121,7 +140,7 @@ class HelpdeskTicket(models.Model):
             _logger.warning("Grup helpdesk_manager tidak ditemukan")
             return
 
-        admin_partners = manager_group.users.mapped('partner_id').filtered(
+        admin_partners = manager_group.sudo().users.mapped('partner_id').filtered(
             lambda p: p.email
         )
         if not admin_partners:
@@ -130,8 +149,10 @@ class HelpdeskTicket(models.Model):
 
         try:
             # Kirim ke setiap admin
+            # sudo: tickets are also filed by regular employees, who cannot
+            # read mail templates or other users' partners.
             for partner in admin_partners:
-                template.with_context(
+                template.sudo().with_context(
                     email_to=partner.email,
                 ).send_mail(
                     self.id,

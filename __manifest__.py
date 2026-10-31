@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'KodingYuk IT',
-    'version': '17.0.2.0.0',
+    'version': '17.0.2.1.0',
     'summary': 'IT dashboard, Helpdesk, ARF, JRF, password tools, and cloud cost',
     'description': 'Pusat operasional IT: dashboard, Helpdesk, Access Request Form, Joiner Request Form, alat password, serta biaya AWS dan GCP.',
     'category': 'Administration',
